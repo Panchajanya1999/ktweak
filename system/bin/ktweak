@@ -121,6 +121,9 @@ dbg `uname -a`
 
 # ZRAM support state
 [[ -d "/sys/block/zram0" ]] && dbg "ZRAM supported."
+
+# UFS exists
+[[ -d "/proc/scsi/scsi" ]] && dbg "UFS Exists." && is_UFS=1
 dbg "------------------------------"
 
 # Kernel
@@ -208,10 +211,10 @@ fi
 for queue in /sys/block/*/queue/
 do
 	write "${queue}iostats" 0
-	write "${queue}read_ahead_kb" 0
-	write "${queue}nr_requests" 512
-	write "${queue}scheduler" noop
-	write "${queue}scheduler" none
+	write "${queue}read_ahead_kb" 128
+	is_UFS && write "${queue}read_ahead_kb" 0
+	is_UFS && write "${queue}nr_requests" 512
+	is_UFS && write "${queue}scheduler" noop
 done
 
 dbg "Finished with $ERR_CNT failed writes."
